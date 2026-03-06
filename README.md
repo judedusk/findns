@@ -80,9 +80,13 @@ chmod +x findns-linux-amd64
 ### Requirements
 
 - **Go 1.24+** for building from source
-- **dnstt-client** in PATH (for e2e DNSTT tests)
-- **slipstream-client** in PATH (for e2e Slipstream tests)
-- **curl** in PATH (for e2e connectivity verification)
+- **dnstt-client** — only for e2e tunnel tests (`--pubkey`). Install: `go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest`
+- **slipstream-client** — only for e2e Slipstream tests (`--cert`)
+- **curl** — for e2e connectivity verification
+
+> **Important:** On Linux, you must place `dnstt-client` in PATH (e.g. `/usr/local/bin/`). Just putting it next to the scanner is not enough. Run: `sudo mv dnstt-client /usr/local/bin/ && sudo chmod +x /usr/local/bin/dnstt-client`
+>
+> Without `--pubkey`, the scanner still finds resolvers compatible with DNS tunneling — it tests ping, resolve, NXDOMAIN, EDNS, and tunnel delegation without needing dnstt-client.
 
 ---
 
@@ -634,9 +638,13 @@ go install github.com/SamNet-dev/findns/cmd@latest
 ### پیش‌نیازها
 
 - **Go 1.24+** برای بیلد از سورس
-- **dnstt-client** در PATH (برای تست e2e DNSTT)
-- **slipstream-client** در PATH (برای تست e2e Slipstream)
-- **curl** در PATH (برای تأیید اتصال e2e)
+- **dnstt-client** — فقط برای تست e2e تانل (`--pubkey`). نصب: `go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest`
+- **slipstream-client** — فقط برای تست e2e Slipstream (`--cert`)
+- **curl** — برای تأیید اتصال e2e
+
+> **مهم:** در لینوکس باید `dnstt-client` را در PATH قرار دهید (مثلاً `/usr/local/bin/`). فقط گذاشتن کنار اسکنر کافی نیست. اجرا کنید: `sudo mv dnstt-client /usr/local/bin/ && sudo chmod +x /usr/local/bin/dnstt-client`
+>
+> بدون `--pubkey` هم اسکنر resolverهای سازگار با تانل DNS را پیدا می‌کند (ping, resolve, nxdomain, edns, tunnel delegation بدون نیاز به dnstt-client).
 
 ---
 

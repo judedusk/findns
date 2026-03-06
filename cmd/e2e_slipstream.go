@@ -26,6 +26,11 @@ func runE2ESlipstream(cmd *cobra.Command, args []string) error {
 	certPath, _ := cmd.Flags().GetString("cert")
 	testURL, _ := cmd.Flags().GetString("test-url")
 
+	bin, err := findBinary("slipstream-client")
+	if err != nil {
+		return err
+	}
+
 	ips, err := loadInput()
 	if err != nil {
 		return err
@@ -33,7 +38,7 @@ func runE2ESlipstream(cmd *cobra.Command, args []string) error {
 
 	dur := time.Duration(e2eTimeout) * time.Second
 	ports := scanner.PortPool(30000, workers)
-	check := scanner.SlipstreamCheck(domain, certPath, testURL, ports)
+	check := scanner.SlipstreamCheckBin(bin, domain, certPath, testURL, ports)
 
 	start := time.Now()
 	results := scanner.RunPool(ips, workers, dur, check, newProgress("e2e/slipstream"))

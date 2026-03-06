@@ -174,8 +174,17 @@ func DoHTunnelCheck(domain string, count int) CheckFunc {
 	}
 }
 
+// DoHDnsttCheckBin is like DoHDnsttCheck but uses an explicit binary path.
+func DoHDnsttCheckBin(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
+	return dohDnsttCheck(bin, domain, pubkey, testURL, ports)
+}
+
 // DoHDnsttCheck runs an e2e test using dnstt-client in DoH mode.
 func DoHDnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
+	return dohDnsttCheck("dnstt-client", domain, pubkey, testURL, ports)
+}
+
+func dohDnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
 	return func(url string, timeout time.Duration) (bool, Metrics) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -190,7 +199,7 @@ func DoHDnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
 
 		start := time.Now()
 
-		cmd := execCommandContext(ctx, "dnstt-client",
+		cmd := execCommandContext(ctx, bin,
 			"-doh", url,
 			"-pubkey", pubkey,
 			domain,

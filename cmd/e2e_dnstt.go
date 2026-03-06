@@ -27,6 +27,11 @@ func runE2EDnstt(cmd *cobra.Command, args []string) error {
 	pubkey, _ := cmd.Flags().GetString("pubkey")
 	testURL, _ := cmd.Flags().GetString("test-url")
 
+	bin, err := findBinary("dnstt-client")
+	if err != nil {
+		return err
+	}
+
 	ips, err := loadInput()
 	if err != nil {
 		return err
@@ -34,7 +39,7 @@ func runE2EDnstt(cmd *cobra.Command, args []string) error {
 
 	dur := time.Duration(e2eTimeout) * time.Second
 	ports := scanner.PortPool(30000, workers)
-	check := scanner.DnsttCheck(domain, pubkey, testURL, ports)
+	check := scanner.DnsttCheckBin(bin, domain, pubkey, testURL, ports)
 
 	start := time.Now()
 	results := scanner.RunPool(ips, workers, dur, check, newProgress("e2e/dnstt"))

@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/SamNet-dev/findns/internal/scanner"
@@ -82,6 +85,37 @@ func writeReport(mode string, results []scanner.Result, elapsed time.Duration, s
 	}
 	scanner.PrintStats(mode, results, elapsed)
 	return nil
+}
+
+// findBinary looks for a binary in PATH first, then in the current directory.
+// On Linux, exec.LookPath does NOT check the current directory, so users placing
+// dnstt-client next to the scanner get "not found". This fixes that.
+func findBinary(name string) (string, error) {
+	// Check PATH first
+	if p, err := exec.LookPath(name); err == nil {
+		return p, nil
+	}
+
+	// Check current directory
+	local := name
+	if runtime.GOOS == "windows" && filepath.Ext(name) == "" {
+		local = name + ".exe"
+	}
+	if abs, err := filepath.Abs(local); err == nil {
+		if _, err := os.Stat(abs); err == nil {
+			return abs, nil
+		}
+	}
+
+	hint := ""
+	switch name {
+	case "dnstt-client":
+		hint = "\n\nTo install dnstt-client:\n  go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest\n\nOr download from: https://www.bamsoftware.com/software/dnstt/"
+	case "slipstream-client":
+		hint = "\n\nDownload from: https://github.com/Mygod/slipstream-rust/releases"
+	}
+
+	return "", fmt.Errorf("%s not found in PATH or current directory.%s\n\nIf already downloaded, either:\n  1. Move it to a folder in PATH:  sudo mv %s /usr/local/bin/\n  2. Or add current directory to PATH:  export PATH=$PATH:$(pwd)", name, hint, name)
 }
 
 func isTTY() bool {

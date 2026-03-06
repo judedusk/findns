@@ -22,7 +22,16 @@ func execCommandContext(ctx context.Context, name string, args ...string) *exec.
 	return exec.CommandContext(ctx, name, args...)
 }
 
+// DnsttCheckBin is like DnsttCheck but uses an explicit binary path.
+func DnsttCheckBin(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
+	return dnsttCheck(bin, domain, pubkey, testURL, ports)
+}
+
 func DnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
+	return dnsttCheck("dnstt-client", domain, pubkey, testURL, ports)
+}
+
+func dnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
 	return func(ip string, timeout time.Duration) (bool, Metrics) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -37,7 +46,7 @@ func DnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
 
 		start := time.Now()
 
-		cmd := execCommandContext(ctx, "dnstt-client",
+		cmd := execCommandContext(ctx, bin,
 			"-udp", ip+":53",
 			"-pubkey", pubkey,
 			domain,
@@ -73,7 +82,16 @@ func DnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
 	}
 }
 
+// SlipstreamCheckBin is like SlipstreamCheck but uses an explicit binary path.
+func SlipstreamCheckBin(bin, domain, certPath, testURL string, ports chan int) CheckFunc {
+	return slipstreamCheck(bin, domain, certPath, testURL, ports)
+}
+
 func SlipstreamCheck(domain, certPath, testURL string, ports chan int) CheckFunc {
+	return slipstreamCheck("slipstream-client", domain, certPath, testURL, ports)
+}
+
+func slipstreamCheck(bin, domain, certPath, testURL string, ports chan int) CheckFunc {
 	return func(ip string, timeout time.Duration) (bool, Metrics) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -96,7 +114,7 @@ func SlipstreamCheck(domain, certPath, testURL string, ports chan int) CheckFunc
 		if certPath != "" {
 			args = append(args, "--cert", certPath)
 		}
-		cmd := execCommandContext(ctx, "slipstream-client", args...)
+		cmd := execCommandContext(ctx, bin, args...)
 		cmd.Stdout = io.Discard
 		cmd.Stderr = io.Discard
 		if err := cmd.Start(); err != nil {

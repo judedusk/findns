@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -51,7 +50,7 @@ func parseStepFlag(raw string) (stepConfig, error) {
 	return stepConfig{name: name, params: params}, nil
 }
 
-func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int) (scanner.Step, error) {
+func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int, binPaths map[string]string) (scanner.Step, error) {
 	stepTimeout := defaultTimeout
 	if v, ok := cfg.params["timeout"]; ok {
 		t, err := strconv.Atoi(v)
@@ -102,7 +101,7 @@ func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int)
 		if v, ok := cfg.params["test-url"]; ok {
 			testURL = v
 		}
-		return scanner.Step{Name: "e2e/dnstt", Timeout: dur, Check: scanner.DnsttCheck(domain, pubkey, testURL, ports), SortBy: "e2e_ms"}, nil
+		return scanner.Step{Name: "e2e/dnstt", Timeout: dur, Check: scanner.DnsttCheckBin(binPaths["dnstt-client"], domain, pubkey, testURL, ports), SortBy: "e2e_ms"}, nil
 
 	case "e2e/slipstream":
 		domain, ok := cfg.params["domain"]
@@ -114,7 +113,7 @@ func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int)
 		if v, ok := cfg.params["test-url"]; ok {
 			testURL = v
 		}
-		return scanner.Step{Name: "e2e/slipstream", Timeout: dur, Check: scanner.SlipstreamCheck(domain, cert, testURL, ports), SortBy: "e2e_ms"}, nil
+		return scanner.Step{Name: "e2e/slipstream", Timeout: dur, Check: scanner.SlipstreamCheckBin(binPaths["slipstream-client"], domain, cert, testURL, ports), SortBy: "e2e_ms"}, nil
 
 	case "nxdomain":
 		return scanner.Step{Name: "nxdomain", Timeout: dur, Check: scanner.NXDomainCheck(stepCount), SortBy: "hijack"}, nil
@@ -153,7 +152,7 @@ func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int)
 		if v, ok := cfg.params["test-url"]; ok {
 			testURL = v
 		}
-		return scanner.Step{Name: "doh/e2e", Timeout: dur, Check: scanner.DoHDnsttCheck(domain, pubkey, testURL, ports), SortBy: "e2e_ms"}, nil
+		return scanner.Step{Name: "doh/e2e", Timeout: dur, Check: scanner.DoHDnsttCheckBin(binPaths["dnstt-client"], domain, pubkey, testURL, ports), SortBy: "e2e_ms"}, nil
 
 	default:
 		return scanner.Step{}, fmt.Errorf("unknown step type %q", cfg.name)
@@ -175,20 +174,29 @@ func runChain(cmd *cobra.Command, args []string) error {
 	}
 
 	// Pre-flight: check required binaries for e2e steps
+	binPaths := make(map[string]string) // "dnstt-client" -> resolved path
 	for _, cfg := range configs {
 		switch cfg.name {
 		case "e2e/dnstt", "doh/e2e":
-			if _, err := exec.LookPath("dnstt-client"); err != nil {
-				return fmt.Errorf("step %q requires dnstt-client in PATH (not found)", cfg.name)
+			if _, ok := binPaths["dnstt-client"]; !ok {
+				bin, err := findBinary("dnstt-client")
+				if err != nil {
+					return fmt.Errorf("step %q requires dnstt-client: %w", cfg.name, err)
+				}
+				binPaths["dnstt-client"] = bin
 			}
-			if _, err := exec.LookPath("curl"); err != nil {
+			if _, err := findBinary("curl"); err != nil {
 				return fmt.Errorf("step %q requires curl in PATH (not found)", cfg.name)
 			}
 		case "e2e/slipstream":
-			if _, err := exec.LookPath("slipstream-client"); err != nil {
-				return fmt.Errorf("step %q requires slipstream-client in PATH (not found)", cfg.name)
+			if _, ok := binPaths["slipstream-client"]; !ok {
+				bin, err := findBinary("slipstream-client")
+				if err != nil {
+					return fmt.Errorf("step %q requires slipstream-client: %w", cfg.name, err)
+				}
+				binPaths["slipstream-client"] = bin
 			}
-			if _, err := exec.LookPath("curl"); err != nil {
+			if _, err := findBinary("curl"); err != nil {
 				return fmt.Errorf("step %q requires curl in PATH (not found)", cfg.name)
 			}
 		}
@@ -200,7 +208,7 @@ func runChain(cmd *cobra.Command, args []string) error {
 	// Build all steps
 	steps := make([]scanner.Step, 0, len(configs))
 	for _, cfg := range configs {
-		s, err := buildStep(cfg, timeout, count, ports)
+		s, err := buildStep(cfg, timeout, count, ports, binPaths)
 		if err != nil {
 			return err
 		}

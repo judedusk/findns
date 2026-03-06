@@ -33,6 +33,51 @@ findns همه این‌ها را به صورت خودکار تست می‌کند
 
 **خیر!** findns به تنهایی تمام تست‌های DNS را انجام می‌دهد. فقط اگر بخواهید تست واقعی تانل (e2e) انجام دهید، به dnstt-client یا slipstream-client نیاز دارید. بدون آن‌ها هم اسکنر کامل کار می‌کند.
 
+### dnstt-client چیست و چطور نصبش کنم؟
+
+`dnstt-client` برنامه کلاینت پروژه [DNSTT](https://www.bamsoftware.com/software/dnstt/) است. این برنامه یک تانل DNS-over-UDP یا DNS-over-HTTPS درست می‌کند. findns از این برنامه برای **تست واقعی تانل** (e2e) استفاده می‌کند — یعنی واقعاً یک تانل می‌سازد و بررسی می‌کند اتصال برقرار می‌شود یا نه.
+
+**نصب با Go (ساده‌ترین روش):**
+
+</div>
+
+```bash
+go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest
+```
+
+<div dir="rtl">
+
+**دانلود دستی:**
+
+از [صفحه پروژه DNSTT](https://www.bamsoftware.com/software/dnstt/) باینری آماده دانلود کنید.
+
+**بعد از دانلود، حتماً فایل را در PATH قرار دهید:**
+
+</div>
+
+```bash
+# لینوکس/macOS:
+sudo mv dnstt-client /usr/local/bin/
+sudo chmod +x /usr/local/bin/dnstt-client
+
+# یا PATH را به پوشه فعلی اضافه کنید:
+export PATH=$PATH:$(pwd)
+```
+
+<div dir="rtl">
+
+> **نکته مهم:** فقط گذاشتن فایل کنار findns روی لینوکس **کافی نیست** مگر اینکه پوشه فعلی در PATH باشد. روی ویندوز این مشکل وجود ندارد.
+
+### کدام resolverها برای dnstt کار می‌کنند؟
+
+بدون فلگ `--pubkey` هم findns بررسی می‌کند کدام resolverها **قابلیت** کار با تانل DNS را دارند:
+
+- **resolve/tunnel**: بررسی می‌کند resolver می‌تواند NS record دامنه تانل شما را ببیند
+- **edns**: بررسی می‌کند سایز payload بزرگ (1232 بایت) پشتیبانی می‌شود
+- **nxdomain**: بررسی می‌کند resolver جواب جعلی نمی‌دهد
+
+resolverهایی که همه این مراحل را پاس کنند، **با احتمال بالا** برای dnstt کار می‌کنند. فلگ `--pubkey` فقط تأیید نهایی (e2e) را اضافه می‌کند.
+
 ---
 
 ## 2. نصب و راه‌اندازی

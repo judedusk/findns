@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"sort"
 	"strings"
 	"time"
@@ -72,18 +71,23 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// Pre-flight: verify required binaries before wasting time scanning
+	var dnsttBin, slipstreamBin string
 	if pubkey != "" {
-		if _, err := exec.LookPath("dnstt-client"); err != nil {
-			return fmt.Errorf("--pubkey requires dnstt-client in PATH (not found)")
+		bin, err := findBinary("dnstt-client")
+		if err != nil {
+			return fmt.Errorf("--pubkey requires dnstt-client: %w", err)
 		}
+		dnsttBin = bin
 	}
 	if certPath != "" {
-		if _, err := exec.LookPath("slipstream-client"); err != nil {
-			return fmt.Errorf("--cert requires slipstream-client in PATH (not found)")
+		bin, err := findBinary("slipstream-client")
+		if err != nil {
+			return fmt.Errorf("--cert requires slipstream-client: %w", err)
 		}
+		slipstreamBin = bin
 	}
-	if (pubkey != "" || certPath != "") {
-		if _, err := exec.LookPath("curl"); err != nil {
+	if pubkey != "" || certPath != "" {
+		if _, err := findBinary("curl"); err != nil {
 			return fmt.Errorf("e2e tests require curl in PATH (not found)")
 		}
 	}
@@ -111,7 +115,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 		if domain != "" && pubkey != "" {
 			steps = append(steps, scanner.Step{
 				Name: "doh/e2e", Timeout: time.Duration(e2eTimeout) * time.Second,
-				Check: scanner.DoHDnsttCheck(domain, pubkey, testURL, ports), SortBy: "e2e_ms",
+				Check: scanner.DoHDnsttCheckBin(dnsttBin, domain, pubkey, testURL, ports), SortBy: "e2e_ms",
 			})
 		}
 	} else {
@@ -144,13 +148,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 		if domain != "" && pubkey != "" {
 			steps = append(steps, scanner.Step{
 				Name: "e2e/dnstt", Timeout: time.Duration(e2eTimeout) * time.Second,
-				Check: scanner.DnsttCheck(domain, pubkey, testURL, ports), SortBy: "e2e_ms",
+				Check: scanner.DnsttCheckBin(dnsttBin, domain, pubkey, testURL, ports), SortBy: "e2e_ms",
 			})
 		}
 		if domain != "" && certPath != "" {
 			steps = append(steps, scanner.Step{
 				Name: "e2e/slipstream", Timeout: time.Duration(e2eTimeout) * time.Second,
-				Check: scanner.SlipstreamCheck(domain, certPath, testURL, ports), SortBy: "e2e_ms",
+				Check: scanner.SlipstreamCheckBin(slipstreamBin, domain, certPath, testURL, ports), SortBy: "e2e_ms",
 			})
 		}
 	}
