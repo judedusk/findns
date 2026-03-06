@@ -175,16 +175,16 @@ func DoHTunnelCheck(domain string, count int) CheckFunc {
 }
 
 // DoHDnsttCheckBin is like DoHDnsttCheck but uses an explicit binary path.
-func DoHDnsttCheckBin(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
-	return dohDnsttCheck(bin, domain, pubkey, testURL, ports)
+func DoHDnsttCheckBin(bin, domain, pubkey, testURL, proxyAuth string, ports chan int) CheckFunc {
+	return dohDnsttCheck(bin, domain, pubkey, testURL, proxyAuth, ports)
 }
 
 // DoHDnsttCheck runs an e2e test using dnstt-client in DoH mode.
 func DoHDnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
-	return dohDnsttCheck("dnstt-client", domain, pubkey, testURL, ports)
+	return dohDnsttCheck("dnstt-client", domain, pubkey, testURL, "", ports)
 }
 
-func dohDnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
+func dohDnsttCheck(bin, domain, pubkey, testURL, proxyAuth string, ports chan int) CheckFunc {
 	return func(url string, timeout time.Duration) (bool, Metrics) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -226,7 +226,7 @@ func dohDnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFun
 			return false, nil
 		}
 
-		if !testSOCKS(ctx, port, testURL) {
+		if !testSOCKS(ctx, port, testURL, proxyAuth) {
 			return false, nil
 		}
 		ms := roundMs(float64(time.Since(start).Microseconds()) / 1000.0)

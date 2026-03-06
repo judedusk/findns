@@ -23,15 +23,15 @@ func execCommandContext(ctx context.Context, name string, args ...string) *exec.
 }
 
 // DnsttCheckBin is like DnsttCheck but uses an explicit binary path.
-func DnsttCheckBin(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
-	return dnsttCheck(bin, domain, pubkey, testURL, ports)
+func DnsttCheckBin(bin, domain, pubkey, testURL, proxyAuth string, ports chan int) CheckFunc {
+	return dnsttCheck(bin, domain, pubkey, testURL, proxyAuth, ports)
 }
 
 func DnsttCheck(domain, pubkey, testURL string, ports chan int) CheckFunc {
-	return dnsttCheck("dnstt-client", domain, pubkey, testURL, ports)
+	return dnsttCheck("dnstt-client", domain, pubkey, testURL, "", ports)
 }
 
-func dnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
+func dnsttCheck(bin, domain, pubkey, testURL, proxyAuth string, ports chan int) CheckFunc {
 	return func(ip string, timeout time.Duration) (bool, Metrics) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -74,7 +74,7 @@ func dnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
 			return false, nil
 		}
 
-		if !testSOCKS(ctx, port, testURL) {
+		if !testSOCKS(ctx, port, testURL, proxyAuth) {
 			return false, nil
 		}
 		ms := roundMs(float64(time.Since(start).Microseconds()) / 1000.0)
@@ -83,15 +83,15 @@ func dnsttCheck(bin, domain, pubkey, testURL string, ports chan int) CheckFunc {
 }
 
 // SlipstreamCheckBin is like SlipstreamCheck but uses an explicit binary path.
-func SlipstreamCheckBin(bin, domain, certPath, testURL string, ports chan int) CheckFunc {
-	return slipstreamCheck(bin, domain, certPath, testURL, ports)
+func SlipstreamCheckBin(bin, domain, certPath, testURL, proxyAuth string, ports chan int) CheckFunc {
+	return slipstreamCheck(bin, domain, certPath, testURL, proxyAuth, ports)
 }
 
 func SlipstreamCheck(domain, certPath, testURL string, ports chan int) CheckFunc {
-	return slipstreamCheck("slipstream-client", domain, certPath, testURL, ports)
+	return slipstreamCheck("slipstream-client", domain, certPath, testURL, "", ports)
 }
 
-func slipstreamCheck(bin, domain, certPath, testURL string, ports chan int) CheckFunc {
+func slipstreamCheck(bin, domain, certPath, testURL, proxyAuth string, ports chan int) CheckFunc {
 	return func(ip string, timeout time.Duration) (bool, Metrics) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -137,7 +137,7 @@ func slipstreamCheck(bin, domain, certPath, testURL string, ports chan int) Chec
 			return false, nil
 		}
 
-		if !testSOCKS(ctx, port, testURL) {
+		if !testSOCKS(ctx, port, testURL, proxyAuth) {
 			return false, nil
 		}
 		ms := roundMs(float64(time.Since(start).Microseconds()) / 1000.0)
@@ -152,11 +152,16 @@ func nullDevice() string {
 	return "/dev/null"
 }
 
-func testSOCKS(ctx context.Context, port int, testURL string) bool {
-	cmd := execCommandContext(ctx, "curl",
+func testSOCKS(ctx context.Context, port int, testURL, proxyAuth string) bool {
+	args := []string{
 		"-x", fmt.Sprintf("socks5h://127.0.0.1:%d", port),
 		"-s", "-o", nullDevice(), "-w", "%{http_code}",
-		testURL)
+	}
+	if proxyAuth != "" {
+		args = append(args, "--proxy-user", proxyAuth)
+	}
+	args = append(args, testURL)
+	cmd := execCommandContext(ctx, "curl", args...)
 	output, err := cmd.Output()
 	if err != nil {
 		return false

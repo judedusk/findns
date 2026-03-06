@@ -101,7 +101,8 @@ func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int,
 		if v, ok := cfg.params["test-url"]; ok {
 			testURL = v
 		}
-		return scanner.Step{Name: "e2e/dnstt", Timeout: dur, Check: scanner.DnsttCheckBin(binPaths["dnstt-client"], domain, pubkey, testURL, ports), SortBy: "e2e_ms"}, nil
+		proxyAuth := cfg.params["proxy-auth"]
+		return scanner.Step{Name: "e2e/dnstt", Timeout: dur, Check: scanner.DnsttCheckBin(binPaths["dnstt-client"], domain, pubkey, testURL, proxyAuth, ports), SortBy: "e2e_ms"}, nil
 
 	case "e2e/slipstream":
 		domain, ok := cfg.params["domain"]
@@ -113,7 +114,8 @@ func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int,
 		if v, ok := cfg.params["test-url"]; ok {
 			testURL = v
 		}
-		return scanner.Step{Name: "e2e/slipstream", Timeout: dur, Check: scanner.SlipstreamCheckBin(binPaths["slipstream-client"], domain, cert, testURL, ports), SortBy: "e2e_ms"}, nil
+		proxyAuth := cfg.params["proxy-auth"]
+		return scanner.Step{Name: "e2e/slipstream", Timeout: dur, Check: scanner.SlipstreamCheckBin(binPaths["slipstream-client"], domain, cert, testURL, proxyAuth, ports), SortBy: "e2e_ms"}, nil
 
 	case "nxdomain":
 		return scanner.Step{Name: "nxdomain", Timeout: dur, Check: scanner.NXDomainCheck(stepCount), SortBy: "hijack"}, nil
@@ -152,7 +154,8 @@ func buildStep(cfg stepConfig, defaultTimeout, defaultCount int, ports chan int,
 		if v, ok := cfg.params["test-url"]; ok {
 			testURL = v
 		}
-		return scanner.Step{Name: "doh/e2e", Timeout: dur, Check: scanner.DoHDnsttCheckBin(binPaths["dnstt-client"], domain, pubkey, testURL, ports), SortBy: "e2e_ms"}, nil
+		proxyAuth := cfg.params["proxy-auth"]
+		return scanner.Step{Name: "doh/e2e", Timeout: dur, Check: scanner.DoHDnsttCheckBin(binPaths["dnstt-client"], domain, pubkey, testURL, proxyAuth, ports), SortBy: "e2e_ms"}, nil
 
 	default:
 		return scanner.Step{}, fmt.Errorf("unknown step type %q", cfg.name)

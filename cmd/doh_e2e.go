@@ -17,6 +17,7 @@ func init() {
 	dohE2ECmd.Flags().String("domain", "", "DNSTT tunnel domain")
 	dohE2ECmd.Flags().String("pubkey", "", "DNSTT server public key")
 	dohE2ECmd.Flags().String("test-url", "https://httpbin.org/ip", "URL to fetch through tunnel")
+	dohE2ECmd.Flags().String("proxy-auth", "", "SOCKS proxy auth as user:pass")
 	dohE2ECmd.MarkFlagRequired("domain")
 	dohE2ECmd.MarkFlagRequired("pubkey")
 	dohCmd.AddCommand(dohE2ECmd)
@@ -26,6 +27,7 @@ func runDoHE2E(cmd *cobra.Command, args []string) error {
 	domain, _ := cmd.Flags().GetString("domain")
 	pubkey, _ := cmd.Flags().GetString("pubkey")
 	testURL, _ := cmd.Flags().GetString("test-url")
+	proxyAuth, _ := cmd.Flags().GetString("proxy-auth")
 
 	bin, err := findBinary("dnstt-client")
 	if err != nil {
@@ -39,7 +41,7 @@ func runDoHE2E(cmd *cobra.Command, args []string) error {
 
 	dur := time.Duration(e2eTimeout) * time.Second
 	ports := scanner.PortPool(30000, workers)
-	check := scanner.DoHDnsttCheckBin(bin, domain, pubkey, testURL, ports)
+	check := scanner.DoHDnsttCheckBin(bin, domain, pubkey, testURL, proxyAuth, ports)
 
 	start := time.Now()
 	results := scanner.RunPool(urls, workers, dur, check, newProgress("doh/e2e"))
