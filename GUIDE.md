@@ -4,7 +4,7 @@
 
 **فهرست مطالب:**
 
-[1. findns چیست؟](#-findns-چیست-و-چه-کار-میکند) | [2. نصب](#-نصب-و-راهاندازی) | [3. دریافت لیست](#-دریافت-لیست-resolverها-fetch) | [4. اسکن کامل](#-اسکن-کامل-scan---دستور-اصلی) | [5. دستورات جداگانه](#-دستورات-جداگانه) | [6. Chain](#-پایپلاین-سفارشی-chain) | [7. فلگ‌ها](#%EF%B8%8F-فلگهای-عمومی) | [8. ورودی/خروجی](#-فرمت-ورودی-و-خروجی) | [9. سناریوها](#-سناریوهای-عملی) | [10. نکات](#-نکات-و-ترفندها)
+[1. findns چیست؟](#-findns-چیست-و-چه-کار-میکند) | [2. نصب](#-نصب-و-راهاندازی) | [🪟 ویندوز](#اجرا-روی-ویندوز-) | [3. دریافت لیست](#-دریافت-لیست-resolverها-fetch) | [4. اسکن کامل](#-اسکن-کامل-scan---دستور-اصلی) | [5. دستورات جداگانه](#-دستورات-جداگانه) | [6. Chain](#-پایپلاین-سفارشی-chain) | [7. فلگ‌ها](#%EF%B8%8F-فلگهای-عمومی) | [8. ورودی/خروجی](#-فرمت-ورودی-و-خروجی) | [9. سناریوها](#-سناریوهای-عملی) | [10. نکات](#-نکات-و-ترفندها)
 
 ---
 
@@ -109,6 +109,45 @@ go install github.com/SamNet-dev/findns/cmd@latest
 ```
 
 <div dir="rtl">
+
+### اجرا روی ویندوز 🪟
+
+findns روی ویندوز **بدون نیاز به WSL یا لینوکس** کار می‌کند.
+
+**دانلود مستقیم (بدون نصب چیزی):**
+
+1. فایل [findns-windows-amd64.exe](https://github.com/SamNet-dev/findns/releases/latest/download/findns-windows-amd64.exe) را دانلود کنید
+2. نام آن را به `findns.exe` تغییر دهید (اختیاری)
+3. **cmd** یا **PowerShell** را در همان پوشه باز کنید (Shift + کلیک راست → Open PowerShell here)
+
+**بیلد از سورس روی ویندوز:**
+
+</div>
+
+```powershell
+git clone https://github.com/SamNet-dev/findns.git
+cd findns
+go build -o findns.exe ./cmd
+```
+
+<div dir="rtl">
+
+**نحوه اجرا:** در تمام دستورات این راهنما به جای `findns` از `.\findns.exe` استفاده کنید:
+
+</div>
+
+```powershell
+.\findns.exe fetch -o resolvers.txt
+.\findns.exe scan -i resolvers.txt -o results.json --domain t.example.com
+```
+
+<div dir="rtl">
+
+**نکات ویندوز:**
+- **curl** از قبل در ویندوز 10/11 نصب است
+- اگر ping فیل می‌شود → cmd را **Run as Administrator** باز کنید
+- فایل‌های `dnstt-client.exe` و `slipstream-client.exe` را کنار `findns.exe` بگذارید
+- در PowerShell برای ادامه دستورات طولانی از بک‌تیک `` ` `` استفاده کنید (به جای `\` در لینوکس)
 
 ---
 
