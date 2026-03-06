@@ -40,9 +40,18 @@ func QueryNS(resolver, domain string, timeout time.Duration) ([]string, bool) {
 		return nil, false
 	}
 	var hosts []string
+	// Check Answer section first
 	for _, ans := range r.Answer {
 		if ns, ok := ans.(*dns.NS); ok {
 			hosts = append(hosts, ns.Ns)
+		}
+	}
+	// For subdomain delegations, NS records are often in the Authority section
+	if len(hosts) == 0 {
+		for _, ans := range r.Ns {
+			if ns, ok := ans.(*dns.NS); ok {
+				hosts = append(hosts, ns.Ns)
+			}
 		}
 	}
 	if len(hosts) == 0 {
