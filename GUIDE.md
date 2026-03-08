@@ -66,7 +66,15 @@ export PATH=$PATH:$(pwd)
 
 <div dir="rtl">
 
-> **نکته مهم:** فقط گذاشتن فایل کنار findns روی لینوکس **کافی نیست** مگر اینکه پوشه فعلی در PATH باشد. روی ویندوز این مشکل وجود ندارد.
+> **نکته:** findns به صورت خودکار فایل کلاینت را در سه مسیر جستجو می‌کند: ۱) `PATH` سیستم ۲) پوشه فعلی ۳) کنار فایل findns. پس ساده‌ترین روش: فایل را کنار findns بگذارید.
+
+### slipstream-client چیست و چطور نصبش کنم؟
+
+`slipstream-client` کلاینت پروژه [Slipstream](https://github.com/Mygod/slipstream-rust) است. مشابه DNSTT ولی با پروتکل متفاوت.
+
+**دانلود:** از [صفحه Release](https://github.com/Mygod/slipstream-rust/releases) باینری مناسب سیستم خود را دانلود کنید.
+
+محل قرارگیری فایل: مثل dnstt-client — کنار findns بگذارید یا به PATH اضافه کنید.
 
 ### کدام resolverها برای dnstt کار می‌کنند؟
 
@@ -552,6 +560,20 @@ findns edns -i resolvers.txt -o edns-results.json --domain t.example.com
 
 سایزهای 512, 900 و 1232 بایت را تست می‌کند.
 
+---
+
+### پیش‌نیازهای تست E2E (مهم - حتماً بخوانید)
+
+تست e2e فقط بررسی DNS نیست — **واقعاً یک تانل باز می‌کند و ترافیک رد می‌کند.** برای این کار به دو چیز نیاز دارید:
+
+**۱. سرور تانل فعال:** شما باید یک سرور DNSTT یا Slipstream **از قبل راه‌اندازی کرده باشید** روی یک VPS. بدون سرور، تست e2e نمی‌تواند کار کند چون باید واقعاً به سرور وصل شود.
+
+**۲. باینری کلاینت:** فایل `dnstt-client` یا `slipstream-client` باید روی سیستم شما موجود باشد. (نحوه نصب: [بخش ۱ - dnstt-client چیست؟](#dnstt-client-چیست-و-چطور-نصبش-کنم))
+
+> **اگر سرور تانل ندارید:** فقط تا مرحله `tunnel` (بررسی NS record) می‌توانید تست کنید. این مرحله بررسی می‌کند resolver **قابلیت** ساپورت تانل را دارد، ولی تضمین واقعی نمی‌دهد. برای تضمین واقعی باید e2e بزنید.
+
+---
+
 ### e2e dnstt - تست واقعی تانل DNSTT
 
 </div>
@@ -563,7 +585,13 @@ findns e2e dnstt -i resolvers.txt -o e2e-results.json \
 
 <div dir="rtl">
 
-نیازمند: `dnstt-client` و `curl`
+این دستور برای هر ریزالور:
+1. `dnstt-client` را اجرا می‌کند
+2. یک پروکسی SOCKS لوکال باز می‌کند
+3. با `curl` از طریق پروکسی یک درخواست HTTP ارسال می‌کند
+4. اگر جواب آمد = ریزالور واقعاً کار می‌کند
+
+نیازمند: `dnstt-client` و `curl` و سرور DNSTT فعال
 
 ### e2e slipstream - تست واقعی تانل Slipstream
 
@@ -576,7 +604,7 @@ findns e2e slipstream -i resolvers.txt -o e2e-results.json \
 
 <div dir="rtl">
 
-نیازمند: `slipstream-client` و `curl`
+نیازمند: `slipstream-client` و `curl` و سرور Slipstream فعال
 
 ### doh resolve - تست DoH Resolution
 
