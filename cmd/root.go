@@ -120,7 +120,7 @@ func findBinary(name string) (string, error) {
 	hint := ""
 	switch name {
 	case "dnstt-client":
-		hint = "\n\nTo install dnstt-client:\n  go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest\n\nOr download from: https://www.bamsoftware.com/software/dnstt/"
+		hint = "\n\nDownload pre-built binary from findns releases:\n  https://github.com/SamNet-dev/findns/releases/latest\n\nOr install with Go:\n  go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest"
 	case "slipstream-client":
 		hint = "\n\nDownload from: https://github.com/Mygod/slipstream-rust/releases"
 	}

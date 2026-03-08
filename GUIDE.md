@@ -35,9 +35,57 @@ findns همه این‌ها را به صورت خودکار تست می‌کند
 
 ### dnstt-client چیست و چطور نصبش کنم؟
 
-`dnstt-client` برنامه کلاینت پروژه [DNSTT](https://www.bamsoftware.com/software/dnstt/) است. این برنامه یک تانل DNS-over-UDP یا DNS-over-HTTPS درست می‌کند. findns از این برنامه برای **تست واقعی تانل** (e2e) استفاده می‌کند — یعنی واقعاً یک تانل می‌سازد و بررسی می‌کند اتصال برقرار می‌شود یا نه.
+`dnstt-client` برنامه کلاینت پروژه [DNSTT](https://www.bamsoftware.com/software/dnstt/) است. findns از این برنامه برای **تست واقعی تانل** (e2e) استفاده می‌کند — واقعاً یک تانل می‌سازد و بررسی می‌کند اتصال برقرار می‌شود یا نه.
 
-**نصب با Go (ساده‌ترین روش):**
+#### روش 1: دانلود باینری آماده از صفحه findns (پیشنهادی — نیازی به نصب Go ندارد)
+
+باینری‌های آماده `dnstt-client` در صفحه Release خود findns موجود است:
+
+</div>
+
+**ویندوز:**
+```powershell
+# دانلود از صفحه Release:
+# https://github.com/SamNet-dev/findns/releases/latest/download/dnstt-client-windows-amd64.exe
+# فایل را کنار findns.exe بگذارید و نامش را تغییر دهید:
+
+rename dnstt-client-windows-amd64.exe dnstt-client.exe
+```
+
+<div dir="rtl">
+
+ساختار پوشه روی ویندوز:
+
+</div>
+
+```
+📁 C:\Users\you\findns\
+├── findns.exe                    (یا findns-windows-amd64.exe)
+├── dnstt-client.exe              ← دانلود از Release
+└── resolvers.txt
+```
+
+<div dir="rtl">
+
+</div>
+
+**لینوکس:**
+```bash
+# دانلود
+curl -LO https://github.com/SamNet-dev/findns/releases/latest/download/dnstt-client-linux-amd64
+chmod +x dnstt-client-linux-amd64
+mv dnstt-client-linux-amd64 dnstt-client
+
+# گذاشتن کنار findns (ساده‌ترین روش):
+mv dnstt-client /path/to/findns/
+
+# یا گذاشتن در PATH:
+sudo mv dnstt-client /usr/local/bin/
+```
+
+<div dir="rtl">
+
+#### روش 2: نصب با Go (اگر Go نصب دارید)
 
 </div>
 
@@ -47,34 +95,19 @@ go install www.bamsoftware.com/git/dnstt.git/dnstt-client@latest
 
 <div dir="rtl">
 
-**دانلود دستی:**
+#### روش 3: دانلود از سایت اصلی DNSTT
 
-از [صفحه پروژه DNSTT](https://www.bamsoftware.com/software/dnstt/) باینری آماده دانلود کنید.
+از [صفحه پروژه DNSTT](https://www.bamsoftware.com/software/dnstt/) دانلود کنید. **نکته:** فایل دانلودی یک آرشیو حاوی سورس‌کد Go است، نه باینری آماده. برای استفاده باید با `go build` بیلد کنید.
 
-**بعد از دانلود، حتماً فایل را در PATH قرار دهید:**
-
-</div>
-
-```bash
-# لینوکس/macOS:
-sudo mv dnstt-client /usr/local/bin/
-sudo chmod +x /usr/local/bin/dnstt-client
-
-# یا PATH را به پوشه فعلی اضافه کنید:
-export PATH=$PATH:$(pwd)
-```
-
-<div dir="rtl">
-
-> **نکته:** findns به صورت خودکار فایل کلاینت را در سه مسیر جستجو می‌کند: ۱) `PATH` سیستم ۲) پوشه فعلی ۳) کنار فایل findns. پس ساده‌ترین روش: فایل را کنار findns بگذارید.
+> **findns به صورت خودکار** فایل کلاینت را در سه مسیر جستجو می‌کند: ۱) `PATH` سیستم ۲) پوشه فعلی ۳) کنار فایل findns. ساده‌ترین روش: فایل exe را کنار findns بگذارید.
 
 ### slipstream-client چیست و چطور نصبش کنم؟
 
 `slipstream-client` کلاینت پروژه [Slipstream](https://github.com/Mygod/slipstream-rust) است. مشابه DNSTT ولی با پروتکل متفاوت.
 
-**دانلود:** از [صفحه Release](https://github.com/Mygod/slipstream-rust/releases) باینری مناسب سیستم خود را دانلود کنید.
+**دانلود:** از [صفحه Release پروژه Slipstream](https://github.com/Mygod/slipstream-rust/releases) باینری مناسب سیستم خود را دانلود کنید (فایل `windows-x86_64` برای ویندوز، `linux-x86_64` برای لینوکس).
 
-محل قرارگیری فایل: مثل dnstt-client — کنار findns بگذارید یا به PATH اضافه کنید.
+محل قرارگیری: مثل dnstt-client — فایل `slipstream-client.exe` (ویندوز) یا `slipstream-client` (لینوکس) را کنار findns بگذارید.
 
 ### کدام resolverها برای dnstt کار می‌کنند؟
 
