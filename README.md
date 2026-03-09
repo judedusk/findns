@@ -521,6 +521,40 @@ JSON with structured results:
 
 ## 🔧 Example Workflows
 
+### Scan with Pre-Selected Iranian Resolvers & CIDR Ranges
+
+The repo includes two ready-to-use files for scanning Iranian network resolvers. Both are included in the repository — just clone and scan:
+
+| File | Contents | Use Case |
+|------|----------|----------|
+| [`ir-resolvers.txt`](ir-resolvers.txt) | 991 pre-identified Iranian DNS resolvers | Fast scan — these are known resolvers |
+| [`ir-cidrs.txt`](ir-cidrs.txt) | 650 Iranian CIDR ranges | Discover new resolvers from IP blocks |
+
+**Quick scan with known resolvers:**
+
+```bash
+# Scan pre-identified resolvers against your tunnel domain
+findns scan -i ir-resolvers.txt -o results.json --domain t.example.com
+```
+
+**Discover new resolvers from CIDR ranges:**
+
+```bash
+# ir-cidrs.txt contains IP ranges — findns expands them automatically
+findns scan -i ir-cidrs.txt -o results.json --domain t.example.com
+```
+
+**With e2e DNSTT verification:**
+
+```bash
+findns scan -i ir-resolvers.txt -o results.json \
+  --domain t.example.com --pubkey <hex-pubkey>
+```
+
+> For a detailed step-by-step walkthrough, see the [Iranian DNS Resolver Scan Guide](https://telegra.ph/Iranian-DNS-Resolver-Scan-for-DNS-Tunnel--Step-by-Step-Guide-03-06).
+
+---
+
 ### Find working UDP resolvers for DNSTT
 
 ```bash
@@ -1220,6 +1254,52 @@ JSON با نتایج ساختاریافته:
 ---
 
 ## 🔧 مثال‌های کاربردی
+
+### اسکن با resolverها و رنج‌های آی‌پی از پیش آماده ایران
+
+در ریپو دو فایل آماده برای اسکن resolverهای شبکه ایران وجود دارد. هر دو فایل در ریپو موجود هستند — فقط clone کنید و اسکن را شروع کنید:
+
+| فایل | محتوا | کاربرد |
+|------|-------|--------|
+| [`ir-resolvers.txt`](ir-resolvers.txt) | 991 resolver شناسایی‌شده ایرانی | اسکن سریع — اینها resolverهای شناخته‌شده هستند |
+| [`ir-cidrs.txt`](ir-cidrs.txt) | 650 رنج CIDR ایرانی | کشف resolverهای جدید از بلوک‌های آی‌پی |
+
+**اسکن سریع با resolverهای شناخته‌شده:**
+
+</div>
+
+```bash
+# اسکن resolverهای از پیش شناسایی‌شده با دامنه تانل شما
+findns scan -i ir-resolvers.txt -o results.json --domain t.example.com
+```
+
+<div dir="rtl">
+
+**کشف resolverهای جدید از رنج‌های CIDR:**
+
+</div>
+
+```bash
+# فایل ir-cidrs.txt شامل رنج آی‌پی است — findns خودکار آنها را باز می‌کند
+findns scan -i ir-cidrs.txt -o results.json --domain t.example.com
+```
+
+<div dir="rtl">
+
+**با تست واقعی تانل DNSTT:**
+
+</div>
+
+```bash
+findns scan -i ir-resolvers.txt -o results.json \
+  --domain t.example.com --pubkey <hex-pubkey>
+```
+
+<div dir="rtl">
+
+> برای راهنمای قدم‌به‌قدم کامل، [راهنمای اسکن DNS ایران](https://telegra.ph/Iranian-DNS-Resolver-Scan-for-DNS-Tunnel--Step-by-Step-Guide-03-06) را ببینید.
+
+---
 
 ### پیدا کردن resolver UDP کارآمد برای DNSTT
 
