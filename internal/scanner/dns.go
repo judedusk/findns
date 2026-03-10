@@ -140,14 +140,27 @@ var nsResolvers = []string{
 	"213.42.20.20",    // Etisalat DNS (UAE)
 }
 
-// QueryNSMulti tries multiple public resolvers to verify NS delegation.
-// Returns on the first successful response.
+// QueryNSMulti tries all resolvers in parallel and returns the first successful result.
+// Overall deadline is the per-resolver timeout (first responder wins).
 func QueryNSMulti(domain string, timeout time.Duration) ([]string, bool) {
+	type nsResult struct {
+		hosts []string
+		ok    bool
+	}
+	ch := make(chan nsResult, len(nsResolvers))
 	for _, resolver := range nsResolvers {
-		hosts, ok := QueryNS(resolver, domain, timeout)
-		if ok && len(hosts) > 0 {
-			return hosts, true
+		go func(r string) {
+			hosts, ok := QueryNS(r, domain, timeout)
+			ch <- nsResult{hosts, ok && len(hosts) > 0}
+		}(resolver)
+	}
+	failures := 0
+	for range nsResolvers {
+		res := <-ch
+		if res.ok {
+			return res.hosts, true
 		}
+		failures++
 	}
 	return nil, false
 }
