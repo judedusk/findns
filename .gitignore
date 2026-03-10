@@ -1,0 +1,4 @@
+*.exe
+*.exe~
+results.json
+results.js

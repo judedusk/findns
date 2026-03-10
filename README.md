@@ -24,6 +24,7 @@ Supports both **UDP** and **DoH (DNS-over-HTTPS)** resolvers with end-to-end tun
 | ⚡ **High Concurrency** | 50 parallel workers by default — scans thousands of resolvers in minutes |
 | 📋 **JSON Pipeline** | Output from one scan feeds into the next for multi-stage filtering |
 | 🌐 **CIDR Input** | Accept IP ranges like `185.51.200.0/24` — auto-expanded to individual hosts |
+| 🖥️ **Interactive TUI** | Full terminal UI with guided setup — no flags to remember |
 
 ---
 
@@ -156,6 +157,14 @@ Use `.\findns.exe` instead of `findns` in all commands:
 
 ## 🚀 Quick Start
 
+### 🖥️ Interactive Mode (Easiest)
+
+```bash
+findns tui
+```
+
+Launches a full terminal UI that guides you through mode selection, resolver input, and scan configuration. No flags needed — just follow the prompts.
+
 ### 1️⃣ Get Resolver Lists
 
 ```bash
@@ -204,6 +213,24 @@ Results are saved as JSON. The `passed` array contains resolvers that survived a
 ---
 
 ## 📖 Commands
+
+### 🖥️ `tui` — Interactive Terminal UI
+
+```bash
+findns tui
+```
+
+A guided terminal interface for the full scan workflow. No flags or files needed — the TUI walks you through everything:
+
+1. **Mode selection** — Choose UDP or DoH scanning
+2. **Input selection** — Pick from bundled resolver lists (7,854 known resolvers, CIDR range scans with configurable sampling, or load your own file)
+3. **Configuration** — Set domain, workers, timeout, toggle options (Skip Ping, NXDOMAIN, EDNS). E2E testing is optional — toggle it on to see binary availability status and configure pubkey/cert
+4. **Live progress** — Watch each scan step with progress bars, pass/fail counts, and elapsed time
+5. **Results** — Scrollable ranked table with all metrics
+
+**Keyboard:** `↑/↓` navigate, `Tab` next field, `Space` toggle, `Enter` confirm, `q` cancel/quit, `Ctrl+C` force quit.
+
+---
 
 ### 🎯 `scan` — All-in-One Pipeline (Recommended)
 
@@ -519,84 +546,6 @@ JSON with structured results:
 
 ---
 
-## 🔧 Example Workflows
-
-### Scan with Pre-Selected Iranian Resolvers & CIDR Ranges
-
-The repo includes two ready-to-use files for scanning Iranian network resolvers. Both are included in the repository — just clone and scan:
-
-| File | Contents | Use Case |
-|------|----------|----------|
-| [`ir-resolvers.txt`](ir-resolvers.txt) | 991 pre-identified Iranian DNS resolvers | Fast scan — these are known resolvers |
-| [`ir-cidrs.txt`](ir-cidrs.txt) | 650 Iranian CIDR ranges | Discover new resolvers from IP blocks |
-
-**Quick scan with known resolvers:**
-
-```bash
-# Scan pre-identified resolvers against your tunnel domain
-findns scan -i ir-resolvers.txt -o results.json --domain t.example.com
-```
-
-**Discover new resolvers from CIDR ranges:**
-
-```bash
-# ir-cidrs.txt contains IP ranges — findns expands them automatically
-findns scan -i ir-cidrs.txt -o results.json --domain t.example.com
-```
-
-**With e2e DNSTT verification:**
-
-```bash
-findns scan -i ir-resolvers.txt -o results.json \
-  --domain t.example.com --pubkey <hex-pubkey>
-```
-
-> For a detailed step-by-step walkthrough, see the [Iranian DNS Resolver Scan Guide](https://telegra.ph/Iranian-DNS-Resolver-Scan-for-DNS-Tunnel--Step-by-Step-Guide-03-06).
-
----
-
-### Find working UDP resolvers for DNSTT
-
-```bash
-# 1. Get resolvers
-findns fetch -o resolvers.txt --local
-
-# 2. Full scan with e2e
-findns scan -i resolvers.txt -o results.json \
-  --domain t.mysite.com --pubkey abc123...
-
-# 3. Use the best resolver in your DNSTT client
-dnstt-client -udp <best-ip>:53 -pubkey-file server.pub t.mysite.com 127.0.0.1:1080
-```
-
-### Find working DoH resolvers for DNSTT
-
-```bash
-# 1. Get DoH endpoints
-findns fetch -o doh.txt --doh
-
-# 2. Scan with DoH e2e
-findns scan -i doh.txt -o results.json \
-  --domain t.mysite.com --pubkey abc123... --doh
-
-# 3. Use the best DoH resolver
-dnstt-client -doh <best-url> -pubkey-file server.pub t.mysite.com 127.0.0.1:1080
-```
-
-### Multi-stage filtering with chain
-
-```bash
-# Quick filter → deep test
-findns chain -i resolvers.txt -o results.json \
-  --step "ping:count=1" \
-  --step "resolve:domain=google.com,count=1" \
-  --step "nxdomain:count=2" \
-  --step "edns:domain=t.mysite.com" \
-  --step "e2e/dnstt:domain=t.mysite.com,pubkey=abc123,timeout=10"
-```
-
----
-
 ## 🙏 Credits
 
 This project was originally inspired by [net2share/dnst-scanner](https://github.com/net2share/dnst-scanner). We rebuilt and expanded it with DoH support, NXDOMAIN/EDNS checks, a full scan pipeline, TUI, cross-platform fixes, and CI releases.
@@ -660,6 +609,7 @@ MIT
 | ⚡ **همزمانی بالا** | 50 worker موازی — هزاران resolver در چند دقیقه اسکن می‌شود |
 | 📋 **خروجی JSON** | خروجی هر اسکن ورودی اسکن بعدی می‌شود |
 | 🌐 **ورودی CIDR** | رنج آی‌پی مثل `185.51.200.0/24` را می‌خواند و به صورت خودکار باز می‌کند |
+| 🖥️ **رابط کاربری ترمینال (TUI)** | رابط تعاملی کامل — بدون نیاز به حفظ فلگ‌ها |
 
 ---
 
@@ -820,6 +770,18 @@ go build -o findns.exe ./cmd
 
 ## 🚀 شروع سریع
 
+### 🖥️ حالت تعاملی (ساده‌ترین روش)
+
+</div>
+
+```bash
+findns tui
+```
+
+<div dir="rtl">
+
+یک رابط کاربری ترمینال کامل باز می‌شود که شما را قدم به قدم راهنمایی می‌کند: انتخاب حالت (UDP/DoH)، انتخاب لیست ریزالور، تنظیمات اسکن، و مشاهده نتایج. نیازی به فلگ نیست — فقط دنبال کنید.
+
 ### 1️⃣ دریافت لیست Resolverها
 
 </div>
@@ -879,6 +841,28 @@ findns scan -i doh-resolvers.txt -o results.json \
 ---
 
 ## 📖 دستورات
+
+### 🖥️ `tui` — رابط کاربری ترمینال
+
+</div>
+
+```bash
+findns tui
+```
+
+<div dir="rtl">
+
+رابط تعاملی ترمینال برای کل فرآیند اسکن. بدون نیاز به فلگ یا فایل — TUI شما را قدم به قدم راهنمایی می‌کند:
+
+1. **انتخاب حالت** — UDP یا DoH
+2. **انتخاب ورودی** — لیست‌های داخلی (7,854 ریزالور شناخته‌شده، اسکن رنج CIDR با نمونه‌گیری قابل تنظیم)، یا فایل دلخواه
+3. **تنظیمات** — دامنه، تعداد worker، تایم‌اوت، گزینه‌ها (رد کردن Ping/NXDOMAIN/EDNS). تست E2E اختیاری است — روشن کنید تا وضعیت باینری‌ها و تنظیمات pubkey/cert را ببینید
+4. **پیشرفت زنده** — نوار پیشرفت هر مرحله با تعداد موفق/ناموفق
+5. **نتایج** — جدول رتبه‌بندی با اسکرول و تمام متریک‌ها
+
+**کلیدها:** `↑/↓` حرکت، `Tab` فیلد بعدی، `Space` تغییر وضعیت، `Enter` تأیید، `q` لغو/خروج، `Ctrl+C` خروج فوری.
+
+---
 
 ### 🎯 `scan` — پایپلاین یکپارچه (پیشنهادی)
 
@@ -1252,106 +1236,6 @@ JSON با نتایج ساختاریافته:
 <div dir="rtl">
 
 ---
-
-## 🔧 مثال‌های کاربردی
-
-### اسکن با resolverها و رنج‌های آی‌پی از پیش آماده ایران
-
-در ریپو دو فایل آماده برای اسکن resolverهای شبکه ایران وجود دارد. هر دو فایل در ریپو موجود هستند — فقط clone کنید و اسکن را شروع کنید:
-
-| فایل | محتوا | کاربرد |
-|------|-------|--------|
-| [`ir-resolvers.txt`](ir-resolvers.txt) | 991 resolver شناسایی‌شده ایرانی | اسکن سریع — اینها resolverهای شناخته‌شده هستند |
-| [`ir-cidrs.txt`](ir-cidrs.txt) | 650 رنج CIDR ایرانی | کشف resolverهای جدید از بلوک‌های آی‌پی |
-
-**اسکن سریع با resolverهای شناخته‌شده:**
-
-</div>
-
-```bash
-# اسکن resolverهای از پیش شناسایی‌شده با دامنه تانل شما
-findns scan -i ir-resolvers.txt -o results.json --domain t.example.com
-```
-
-<div dir="rtl">
-
-**کشف resolverهای جدید از رنج‌های CIDR:**
-
-</div>
-
-```bash
-# فایل ir-cidrs.txt شامل رنج آی‌پی است — findns خودکار آنها را باز می‌کند
-findns scan -i ir-cidrs.txt -o results.json --domain t.example.com
-```
-
-<div dir="rtl">
-
-**با تست واقعی تانل DNSTT:**
-
-</div>
-
-```bash
-findns scan -i ir-resolvers.txt -o results.json \
-  --domain t.example.com --pubkey <hex-pubkey>
-```
-
-<div dir="rtl">
-
-> برای راهنمای قدم‌به‌قدم کامل، [راهنمای اسکن DNS ایران](https://telegra.ph/Iranian-DNS-Resolver-Scan-for-DNS-Tunnel--Step-by-Step-Guide-03-06) را ببینید.
-
----
-
-### پیدا کردن resolver UDP کارآمد برای DNSTT
-
-</div>
-
-```bash
-# ۱. دریافت لیست
-findns fetch -o resolvers.txt --local
-
-# ۲. اسکن کامل با تست e2e
-findns scan -i resolvers.txt -o results.json \
-  --domain t.mysite.com --pubkey abc123...
-
-# ۳. استفاده از بهترین resolver
-dnstt-client -udp <best-ip>:53 -pubkey-file server.pub t.mysite.com 127.0.0.1:1080
-```
-
-<div dir="rtl">
-
-### پیدا کردن resolver DoH کارآمد برای DNSTT
-
-</div>
-
-```bash
-# ۱. دریافت لیست DoH
-findns fetch -o doh.txt --doh
-
-# ۲. اسکن DoH با تست e2e
-findns scan -i doh.txt -o results.json \
-  --domain t.mysite.com --pubkey abc123... --doh
-
-# ۳. استفاده از بهترین resolver
-dnstt-client -doh <best-url> -pubkey-file server.pub t.mysite.com 127.0.0.1:1080
-```
-
-<div dir="rtl">
-
-### فیلتر چندمرحله‌ای با chain
-
-</div>
-
-```bash
-# فیلتر سریع → تست عمیق
-findns chain -i resolvers.txt -o results.json \
-  --step "ping:count=1" \
-  --step "resolve:domain=google.com,count=1" \
-  --step "nxdomain:count=2" \
-  --step "edns:domain=t.mysite.com" \
-  --step "e2e/dnstt:domain=t.mysite.com,pubkey=abc123,timeout=10"
-```
-
-<div dir="rtl">
 
 ---
 

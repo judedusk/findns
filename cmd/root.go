@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/SamNet-dev/findns/internal/scanner"
+	"github.com/SamNet-dev/findns/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +27,17 @@ var rootCmd = &cobra.Command{
 	Use:               "findns",
 	Short:             "DNS tunnel scanner - test resolvers for tunneling viability",
 	CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
+	// Launch TUI when no subcommand is given
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg := tui.ScanConfig{
+			OutputFile: outputFile,
+			Workers:    workers,
+			Timeout:    timeout,
+			Count:      count,
+			E2ETimeout: e2eTimeout,
+		}
+		return tui.RunWithConfig(cfg)
+	},
 }
 
 func init() {
