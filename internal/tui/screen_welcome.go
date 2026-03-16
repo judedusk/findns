@@ -153,8 +153,12 @@ func parseCLIFlags(m *Model, raw string) {
 			}
 		case "--query-size":
 			if next != "" {
-				fmt.Sscanf(next, "%d", &m.config.QuerySize)
-				m.configInputs[txtQuerySize].SetValue(next)
+				var qs int
+				fmt.Sscanf(next, "%d", &qs)
+				if qs >= 0 {
+					m.config.QuerySize = qs
+					m.configInputs[txtQuerySize].SetValue(next)
+				}
 				i++
 			}
 		case "--e2e":

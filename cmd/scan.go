@@ -90,10 +90,11 @@ func runScan(cmd *cobra.Command, args []string) error {
 	querySize, _ := cmd.Flags().GetInt("query-size")
 	cidrRanges, _ := cmd.Flags().GetStringSlice("cidr")
 
-	// Apply query size (dnstt-client MTU)
-	if querySize > 0 {
-		scanner.DnsttMTU = querySize
+	// Apply query size (dnstt-client MTU); 0 = use max
+	if querySize < 0 {
+		return fmt.Errorf("--query-size must be >= 0 (got %d)", querySize)
 	}
+	scanner.DnsttMTU = querySize
 
 	// Apply EDNS buffer size
 	if ednsSize > 0 && ednsSize <= 65535 {
