@@ -71,7 +71,7 @@ var allFields = []fieldDef{
 	{fSkipNXD, "Skip NXDOMAIN", "", "Skip NXDOMAIN hijack detection. Checks if resolver fakes responses.", -1},
 	{fEDNS, "EDNS Check", "", "Test EDNS0 payload size support. Important for DNS tunneling throughput.", -1},
 	{fEDNSSize, "EDNS Size", "", "EDNS0 UDP payload size in bytes. Larger = better throughput, lower if fragmented.", txtEDNSSize},
-	{fQuerySize, "Query Size", "", "Cap upstream DNS query payload size (dnstt -mtu). 0 = max. Try 50-80 if e2e fails on filtered networks.", txtQuerySize},
+	{fQuerySize, "Query Size", "", "Cap upstream DNS query payload size (dnstt -mtu). Default 50 works best on filtered networks. Use 0 for max.", txtQuerySize},
 	{fE2E, "E2E Testing", "E2E (end-to-end tunnel test)", "Enable end-to-end tunnel tests. Requires tunnel client binaries.", -1},
 	{fPubkey, "Pubkey", "", "Hex public key for dnstt. Requires dnstt-client in PATH.", txtPubkey},
 	{fCert, "Cert", "", "Path to slipstream TLS cert. Requires slipstream-client in PATH.", txtCert},
@@ -147,8 +147,8 @@ func initConfigInputs() []textinput.Model {
 	inputs[txtEDNSSize].CharLimit = 4
 
 	inputs[txtQuerySize] = textinput.New()
-	inputs[txtQuerySize].Placeholder = "0 (max)"
-	inputs[txtQuerySize].SetValue("0")
+	inputs[txtQuerySize].Placeholder = "50"
+	inputs[txtQuerySize].SetValue("50")
 	inputs[txtQuerySize].CharLimit = 4
 
 	inputs[txtE2ETimeout] = textinput.New()

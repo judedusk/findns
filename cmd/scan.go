@@ -67,7 +67,7 @@ func init() {
 	scanCmd.Flags().Bool("skip-nxdomain", false, "skip NXDOMAIN hijack check")
 	scanCmd.Flags().Bool("edns", false, "include EDNS payload size check (filters resolvers that don't support EDNS)")
 	scanCmd.Flags().Int("edns-size", 1232, "EDNS0 UDP payload size in bytes (default 1232, lower if fragmented)")
-	scanCmd.Flags().Int("query-size", 0, "cap dnstt-client upstream query size in bytes (0 = max, try 50-80 if e2e fails)")
+	scanCmd.Flags().Int("query-size", 50, "cap dnstt-client upstream query size in bytes (default 50, use 0 for max)")
 	scanCmd.Flags().StringSlice("cidr", nil, "CIDR range(s) to scan (e.g. --cidr 5.52.0.0/16)")
 	scanCmd.Flags().String("cidr-file", "", "text file with one CIDR range per line to scan")
 	scanCmd.Flags().String("output-ips", "", "write plain IP list (one per line) to this file")
