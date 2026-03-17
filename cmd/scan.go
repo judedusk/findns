@@ -69,6 +69,7 @@ func init() {
 	scanCmd.Flags().Int("edns-size", 1232, "EDNS0 UDP payload size in bytes (default 1232, lower if fragmented)")
 	scanCmd.Flags().Int("query-size", 0, "cap dnstt-client upstream query size in bytes (0 = max, try 50-80 if e2e fails)")
 	scanCmd.Flags().StringSlice("cidr", nil, "CIDR range(s) to scan (e.g. --cidr 5.52.0.0/16)")
+	scanCmd.Flags().String("cidr-file", "", "text file with one CIDR range per line to scan")
 	scanCmd.Flags().String("output-ips", "", "write plain IP list (one per line) to this file")
 	scanCmd.Flags().Int("e2e-top", 100, "number of top SOCKS-passing resolvers to full-verify with curl")
 	scanCmd.Flags().Int("top", 10, "number of top results to display")
@@ -92,6 +93,22 @@ func runScan(cmd *cobra.Command, args []string) error {
 	ednsSize, _ := cmd.Flags().GetInt("edns-size")
 	querySize, _ := cmd.Flags().GetInt("query-size")
 	cidrRanges, _ := cmd.Flags().GetStringSlice("cidr")
+	cidrFile, _ := cmd.Flags().GetString("cidr-file")
+
+	// Load additional CIDRs from file if provided
+	if cidrFile != "" {
+		raw, err := os.ReadFile(cidrFile)
+		if err != nil {
+			return fmt.Errorf("reading --cidr-file %q: %w", cidrFile, err)
+		}
+		for _, line := range strings.Split(string(raw), "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+			cidrRanges = append(cidrRanges, line)
+		}
+	}
 
 	// Apply query size (dnstt-client MTU); 0 = use max
 	if querySize < 0 {
@@ -132,7 +149,11 @@ func runScan(cmd *cobra.Command, args []string) error {
 		if len(expanded) == 0 {
 			return fmt.Errorf("CIDR range(s) produced no usable IPs")
 		}
-		fmt.Fprintf(os.Stderr, "  --cidr: expanded %d range(s) to %d IPs\n", len(cidrRanges), len(expanded))
+		src := "--cidr"
+		if cidrFile != "" {
+			src = "--cidr-file"
+		}
+		fmt.Fprintf(os.Stderr, "  %s: expanded %d range(s) to %d IPs\n", src, len(cidrRanges), len(expanded))
 		ips = expanded
 	} else {
 		var err error
